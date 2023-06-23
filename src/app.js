@@ -1,6 +1,9 @@
 const express = require('express')
 const path = require('path')
 const hbs = require('hbs')
+const request = require('request')
+const geocode = require('../utils/geocode')
+const weatherAPI = require('../utils/weatherAPI')
 
 const app = express()
 
@@ -46,9 +49,25 @@ app.get('/weather', (req, res) => {
             error: 'Please enter address'
         })
     }
-    res.send({
-        address: req.query.address
+
+    geocode.geocoding(req.query.address, (error, coords) => {
+        if (error) {
+            res.send({ error })
+        } else {
+            weatherAPI.weather_data(coords, (error, data) => {
+                if (error) {
+                    res.send({ error })
+
+                } else {
+                    res.send(data)
+
+                }
+            })
+        }
     })
+
+
+
 })
 
 
